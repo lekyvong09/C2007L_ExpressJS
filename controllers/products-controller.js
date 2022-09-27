@@ -1,3 +1,5 @@
+const Product = require('../models/product');
+
 exports.getProducts = (req, res, next) => {
     const baseUrl = 'http://localhost:8080/';
     res.status(200).json({
@@ -13,14 +15,26 @@ exports.getProducts = (req, res, next) => {
 
 
 exports.createProduct = (req, res, next) => {
-    const title = req.body.title;
-    const price = req.body.price;
+    const image = req.files[0];
+    if (!image) {
+        return;
+    }
 
-    res.status(200).json({
-        product: {
-            id: new Date().toISOString(),
-            title: title,
-            price: price
-        }
+    const imageUrl = image.path;
+    const title = req.body.title;
+    const price = req.body.amount;
+    const date = req.body.date;
+    const category = 'U';
+
+    const product = new Product({
+        title: title,
+        price: price,
+        date: date,
+        imageUrl: imageUrl,
+        category: category
     });
+
+    product.save()
+        .then(result => res.status(200).json(result))
+        .catch(err => console.log(err));
 }

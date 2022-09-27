@@ -2,6 +2,8 @@ const express = require('express');
 const adminRoutes = require('./routes/admin');
 const bodyParser = require('body-parser');
 const path = require('path');
+const mongoose = require('mongoose');
+const multer = require('multer');
 
 const app = express();
 
@@ -20,9 +22,32 @@ const app = express();
  */
 app.use(bodyParser.json());
 
+const fileStorage = multer.diskStorage({
+    destination: function(req, file, callback) {
+        callback(null, 'images')
+    },
+    filename: function (req, file, callback) {
+        callback(null, file.originalname)
+    }
+});
+
+const fileFilter = (req, file, callback) => {
+    if (file.mimetype === 'image/png' || file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg') {
+        callback(null, true);
+    } else {
+        callback(null, false);
+    }
+}
+
+app.use(multer({storage: fileStorage, fileFilter: fileFilter}).array('file'));
+
+
 app.use('/images', express.static(path.join(__dirname, 'images')));
-
-
 app.use('/api', adminRoutes);
 
-app.listen(8080);
+mongoose.connect('mongodb+srv://root:ab123456..@cluster0.pgeminn.mongodb.net/shop_rest?retryWrites=true&w=majority')
+    .then(result => {
+        app.listen(8080);
+        console.log('API is listening to port 8080');
+    })
+    .catch(err => console.log(err));
