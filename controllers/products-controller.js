@@ -1,4 +1,5 @@
 const Product = require('../models/product');
+const { validationResult } = require('express-validator');
 const mongoose = require('mongoose');
 
 exports.getProducts = (req, res, next) => {
@@ -16,6 +17,11 @@ exports.getProducts = (req, res, next) => {
 
 
 exports.createProduct = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({errors: errors.array()})
+    }
+
     const image = req.files[0];
     if (!image) {
         return;
