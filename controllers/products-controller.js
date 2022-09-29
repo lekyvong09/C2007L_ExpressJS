@@ -1,4 +1,5 @@
 const Product = require('../models/product');
+const mongoose = require('mongoose');
 
 exports.getProducts = (req, res, next) => {
     const baseUrl = 'http://localhost:8080/';
@@ -35,6 +36,44 @@ exports.createProduct = (req, res, next) => {
     });
 
     product.save()
+        .then(result => res.status(200).json(result))
+        .catch(err => console.log(err));
+}
+
+
+exports.updateProduct = (req, res, next) => {
+    let updateImageUrl = req.body.imageUrl;
+
+    const image = req.files[0];
+    if (image) {
+        updateImageUrl = image.path;
+    }
+
+    const productId = req.body.id;
+    const updatedTitle = req.body.title;
+    const updatedPrice = req.body.amount;
+    const updatedDate = req.body.date;
+    const updatedCategory = req.body.category ? req.body.category : 'U';
+
+    // console.log('productId', productId);
+    Product.findById(mongoose.Types.ObjectId(productId))
+        .then(product => {
+            // console.log('findById', product);
+            product.title = updatedTitle;
+            product.price = updatedPrice;
+            product.date = updatedDate;
+            product.imageUrl = updateImageUrl;
+            product.category = updatedCategory;
+            return product.save();
+        })
+        .then(result => res.status(200).json(result))
+        .catch(err => console.log(err));
+}
+
+
+exports.deleteProduct = (req, res, next) => {
+    const productId = req.params.productId;
+    Product.findByIdAndRemove(productId)
         .then(result => res.status(200).json(result))
         .catch(err => console.log(err));
 }
