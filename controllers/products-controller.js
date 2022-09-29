@@ -5,16 +5,38 @@ const mongoose = require('mongoose');
 exports.getProducts = (req, res, next) => {
     const baseUrl = 'http://localhost:8080/';
 
-    Product.find()
-        .then(result => {
-            res.status(200).json(result.map(product => ({
-                id: product._id,
-                title: product.title,
-                amount: product.price,
-                date: product.date,
-                imageUrl: baseUrl + product.imageUrl,
-                category: product.category
-            })));
+    let totalItem;
+    const pageSize = req.query.size || 1000;
+    const currentPage = req.query.page || 1;
+
+    Product.find().countDocuments()
+        .then(count => {
+            totalItem = count;
+            let totalPages = Math.ceil(totalItem / pageSize);
+
+            Product.find()
+                .skip((currentPage - 1) * pageSize)
+                .limit(pageSize)
+                .then(result => {
+                    transformedProduct = result.map(product => ({
+                        id: product._id,
+                        title: product.title,
+                        amount: product.price,
+                        date: product.date,
+                        imageUrl: baseUrl + product.imageUrl,
+                        category: product.category
+                    }));
+                    console.log(transformedProduct);
+                    res.json({
+                        products: transformedProduct,
+                        page: {
+                            totalElement: totalItem,
+                            page: currentPage,
+                            size: pageSize,
+                            totalPages: totalPages
+                        }
+                    });
+                });
         })
         .catch(err => console.log(err));
 }
