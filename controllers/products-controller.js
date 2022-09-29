@@ -93,6 +93,12 @@ exports.getProductById = (req, res, next) => {
     const productId = req.params.productId;
     Product.findById(productId)
         .then(result => {
+            if (!result) {
+                throw new Error('Could not find product');
+            }
             res.status(200).json(result);
         })
+        .catch(err => {
+            next(err);
+        });
 }
