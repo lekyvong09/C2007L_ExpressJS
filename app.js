@@ -5,6 +5,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 const multer = require('multer');
 const authRoutes = require('./routes/auth');
+const shopRoutes = require('./routes/shop');
 
 const app = express();
 
@@ -46,6 +47,7 @@ app.use(multer({storage: fileStorage, fileFilter: fileFilter}).array('file'));
 app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use('/api', adminRoutes);
 app.use('/api/user', authRoutes);
+app.use('/api', shopRoutes);
 
 /// global handle error
 app.use((error, req, res, next) => {
