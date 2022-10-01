@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const mongoose = require('mongoose');
 const multer = require('multer');
+const authRoutes = require('./routes/auth');
 
 const app = express();
 
@@ -44,12 +45,14 @@ app.use(multer({storage: fileStorage, fileFilter: fileFilter}).array('file'));
 
 app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use('/api', adminRoutes);
+app.use('/api/user', authRoutes);
 
 /// global handle error
 app.use((error, req, res, next) => {
     console.log(error);
     const status = error.statusCode || 500;
-    res.status(status).json({message: error.message});
+    const data = error.data;
+    res.status(status).json({message: error.message, data: data});
 })
 
 mongoose.connect('mongodb+srv://root:ab123456..@cluster0.pgeminn.mongodb.net/shop_rest?retryWrites=true&w=majority')
