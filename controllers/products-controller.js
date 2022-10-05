@@ -26,7 +26,7 @@ exports.getProducts = (req, res, next) => {
                         imageUrl: baseUrl + product.imageUrl,
                         category: product.category
                     }));
-                    console.log(transformedProduct);
+                    // console.log(transformedProduct);
                     res.json({
                         products: transformedProduct,
                         page: {

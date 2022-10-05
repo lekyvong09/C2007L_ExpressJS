@@ -59,7 +59,28 @@ app.use((error, req, res, next) => {
 
 mongoose.connect('mongodb+srv://root:ab123456..@cluster0.pgeminn.mongodb.net/shop_rest?retryWrites=true&w=majority')
     .then(result => {
-        app.listen(8080);
+        const httpServer = app.listen(8080);
         console.log('API is listening to port 8080');
+
+        const io = require('./socket').init(httpServer);
+
+        io.use((socket, next) => {
+            const token = socket.handshake.auth.token.split(" ")[1];
+            require('jsonwebtoken').verify(token, 'r;K*Hx?l[<313U:le(Ai3]KXbsxT3p#Tu!7%PaIuIX6o*PF99C11Oz3NdPXSeI7Clg:&/h7Z|:F#jMI*u-;lEzvJAI\iglqi/_Oj', (err, decodedToken) => {
+                if (err) {
+                    console.log(err);
+                    return next(new Error('Authentication error'));
+                }
+                socket.decoded = decodedToken;
+                next();
+            })
+        });
+
+        io.on('connection', socket => {
+            // console.log('Client connected');
+            console.log(socket.decoded);
+            console.log(socket.id, ' connected');
+            socket.join('room1');
+        });
     })
     .catch(err => console.log(err));

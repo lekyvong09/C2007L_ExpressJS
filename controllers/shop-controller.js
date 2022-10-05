@@ -11,6 +11,8 @@ exports.checkout = (req, res, next) => {
 
     order.save()
         .then(result => {
+            /// require('../socket').getIO().emit('order', {action: 'create', order: result});
+            require('../socket').getIO().to('room1').emit('order', {action: 'create', order: result, room: 'room1'});
             res.status(200).json(result);
         })
         .catch(err => console.log(err));
